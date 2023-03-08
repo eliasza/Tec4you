@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-
+import api from '../lib/Utils/api'
 import {
   AreaChart,
     Block,
@@ -15,8 +15,15 @@ import {
     Metric,
     ProgressBar,
     Toggle,
-    ToggleItem
+    ToggleItem,
+    MultiSelectBox, MultiSelectBoxItem
 } from '@tremor/react';
+
+export async function getServerSideProps(context) {
+    const { data } = await api.get("/covid/regions");
+
+    return { props: { regions: data } }
+}
 
 export const performance = [
   {
@@ -58,17 +65,40 @@ const kpiData = [
   },
 ];
 
-export default function Home() {
+export default function Home({regions}) {
   const [selectedView, setSelectedView] = useState(1);
   const [selectedKpi, setSelectedKpi] = useState('Sales');
+  const [regionsSelect, setRegionsSelect] = useState('Sales');
+
+  function getTotals(){
+
+  }
 
   return (
     <main className="bg-slate-50 p-6 sm:p-10">
-          <Title>Dashboard</Title>
-          <Text>
-              Análise de dados da <b>Covid 19</b>
-          </Text>
-
+        <Flex
+            spaceX="space-x-10">
+            <div>
+                <Title>Dashboard</Title>
+                <Text>
+                    Análise de dados da <b>Covid 19</b>
+                </Text>
+            </div>
+            <div>{regionsSelect}</div>
+            <MultiSelectBox
+                defaultValue={undefined}
+                value={undefined}
+                onValueChange={setRegionsSelect}
+                placeholder="Select..."
+                maxWidth="max-w-sm"
+                marginTop="mt-0"
+                name="msbRegions">
+                {regions.data.map((region) =>(
+                    <MultiSelectBoxItem text={region.name} value={region.iso} key={region.iso}/>
+                ))}
+                
+            </MultiSelectBox>
+        </Flex>
           <TabList defaultValue={ 1 } onValueChange={ (value) => setSelectedView(value) } marginTop="mt-6">
               <Tab value={ 1 } text="Overview" />
               <Tab value={ 2 } text="Detail" />
